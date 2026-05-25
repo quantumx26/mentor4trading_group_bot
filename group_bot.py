@@ -146,6 +146,10 @@ AUTO_REPLIES = [
 
 WELCOME_PUBLIC = (
     "👋 Willkommen {name}\\! Schreib mir einfach wenn du Fragen hast 🤖"
+    "🤖 *Jarvis KI:*\n"
+    "Schreib einfach @JarvisCommunityBot \\+ deine Frage\\!\n"
+    "Ich beantworte alles rund um SMC & Trading\\!\n\n"
+    "📲 Signal Kanal: @mentor4trading\\_signals\n"
 )
 
 WELCOME_PRIVATE = (
@@ -166,6 +170,9 @@ WELCOME_PRIVATE = (
     "🌐 `Website` – Link zur Homepage\n"
     "📱 `Social` – TikTok & Twitch Links\n"
     "📖 `ORB` – ORB Strategie Info\n\n"
+    "🤖 *Jarvis KI:*\n"
+    "Schreib einfach @JarvisCommunityBot \\+ deine Frage\\!\n"
+    "Ich beantworte alles rund um SMC & Trading\\!\n\n"
     "📲 Signal Kanal: @mentor4trading\\_signals\n"
     "━━━━━━━━━━━━━━━━━━━━━\n"
     "🤖 Jarvis | Mentor4Trading"
