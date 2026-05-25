@@ -1,0 +1,351 @@
+#!/usr/bin/env python3
+"""
+Mentor4Trading – Community Gruppen Bot
+- Neue Mitglieder begrüßen
+- Chat überwachen (Links, Werbung, Bilder, Beleidigungen)
+- Auf häufige Fragen automatisch antworten
+"""
+
+import requests
+import os
+import time
+import re
+from datetime import datetime
+import pytz
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# ─────────────────────────────────────────────
+BOT_TOKEN    = os.environ.get("BOT_TOKEN", "")
+GROUP_ID     = os.environ.get("GROUP_ID", "")   # Gruppen-ID (nicht Kanal!)
+YOUR_USER_ID = os.environ.get("YOUR_USER_ID", "")
+TIMEZONE     = "Europe/Berlin"
+# ─────────────────────────────────────────────
+
+BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
+
+# ── Beleidigungen / gesperrte Wörter ──
+BANNED_WORDS = [
+    "idiot", "dummkopf", "arschloch", "wichser", "hurensohn",
+    "scheiß", "fuck", "asshole", "bastard", "vollidiot",
+    "depp", "trottel", "versager", "loser", "idiot", "Fick Dich", "Fuck You", "Wichser", "Wixxer"
+]
+
+# ── Auto-Antworten auf häufige Fragen ──
+AUTO_REPLIES = [
+    {
+        "keywords": ["indikator", "indicator", "smc entry", "entry finder", "pine script"],
+        "reply": (
+            "🎯 *SMC Entry Finder V5*\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Den Indikator findest du hier:\n"
+            "🔗 [mentor4trading.netlify.app/indikator](https://mentor4trading.netlify.app/indikator.html)\n\n"
+            "✅ Live Dashboard · Session & Bias\n"
+            "✅ Entry Zone Visualisierung\n"
+            "✅ Signal Filter mit Alerts\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🤖 Jarvis | @mentor4trading\\_signals"
+        )
+    },
+    {
+        "keywords": ["wann signal", "wann kommen", "nächstes signal", "next signal", "wann trade"],
+        "reply": (
+            "⏰ *Wann kommen Signale?*\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Signale kommen wenn das Setup stimmt –\n"
+            "nicht auf Kommando\\! 📊\n\n"
+            "🕐 *Trading Zeiten:*\n"
+            "• London Session: 08:00 – 12:00\n"
+            "• New York Session: 14:30 – 21:00\n\n"
+            "Nur A\\+ Setups werden gepostet\\.\n"
+            "Kein FOMO, kein Overtrading\\.\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🤖 Jarvis | @mentor4trading\\_signals"
+        )
+    },
+    {
+        "keywords": ["wie trade", "wie funktioniert", "smc erklär", "was ist smc", "was ist ict", "wie lerne"],
+        "reply": (
+            "📚 *SMC/ICT Basics*\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Alles über SMC & ICT gibt es hier:\n"
+            "📱 TikTok: @mentor4trading\n"
+            "🎮 Twitch: twitch.tv/mentor4trading\n\n"
+            "Kostenlos reinschauen & lernen!\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🤖 Jarvis | @mentor4trading\\_signals"
+        )
+    },
+    {
+        "keywords": ["orb", "opening range", "opening range breakout"],
+        "reply": (
+            "📊 *ORB Strategie*\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Das komplette ORB Ebook gibt es hier:\n"
+            "🔗 [mentor4trading.netlify.app](https://mentor4trading.netlify.app)\n\n"
+            "Opening Range Breakout + Retest\n"
+            "Alles erklärt mit echten Chart-Beispielen!\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🤖 Jarvis | @mentor4trading\\_signals"
+        )
+    },
+    {
+        "keywords": ["website", "homepage", "seite", "link", "wo finde"],
+        "reply": (
+            "🌐 *Mentor4Trading Website*\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🔗 [mentor4trading.netlify.app](https://mentor4trading.netlify.app)\n\n"
+            "📊 Indikator · ORB Ebook · Guides\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🤖 Jarvis | @mentor4trading\\_signals"
+        )
+    },
+    {
+        "keywords": ["kanal", "signal kanal", "telegram kanal", "signale kanal"],
+        "reply": (
+            "📲 *Signal Kanal*\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Live Trades direkt auf dein Handy:\n"
+            "👉 @mentor4trading\\_signals\n\n"
+            "✅ Entry, SL & TP in Echtzeit\n"
+            "✅ Täglicher Wirtschaftskalender\n"
+            "✅ Weekly Recap jeden Freitag\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🤖 Jarvis | @mentor4trading\\_signals"
+        )
+    },
+    {
+        "keywords": ["mnq", "mes", "futures", "micro futures", "was trade"],
+        "reply": (
+            "📈 *Gehandelte Instrumente*\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Wir traden hauptsächlich:\n"
+            "• MNQ – Micro E-Mini Nasdaq\n"
+            "• MES – Micro E-Mini S&P 500\n\n"
+            "Kleine Margin, volle Bewegung!\n"
+            "Perfekt für Anfänger & Fortgeschrittene.\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🤖 Jarvis | @mentor4trading\\_signals"
+        )
+    },
+    {
+        "keywords": ["tiktok", "twitch", "youtube", "stream", "video"],
+        "reply": (
+            "📱 *Content Plattformen*\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "📱 TikTok: @mentor4trading\n"
+            "🎮 Twitch: twitch.tv/mentor4trading\n\n"
+            "Kostenlose Strategien & Live Trading!\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🤖 Jarvis | @mentor4trading\\_signals"
+        )
+    },
+]
+
+WELCOME_MSG = (
+    "👋 *Willkommen in der Mentor4Trading Community, {name}!*\n"
+    "━━━━━━━━━━━━━━━━━━━━━\n"
+    "Schön dass du dabei bist! 🎉\n\n"
+    "📌 *Regeln:*\n"
+    "❌ Keine Links oder Werbung\n"
+    "❌ Keine Beleidigungen\n"
+    "❌ Keine Bilder/Videos\n"
+    "✅ Respektvoller Umgang\n"
+    "✅ Trading Fragen jederzeit\n\n"
+    "📲 Signal Kanal: @mentor4trading\\_signals\n"
+    "🌐 Website: mentor4trading.netlify.app\n"
+    "━━━━━━━━━━━━━━━━━━━━━\n"
+    "🤖 Jarvis | Mentor4Trading"
+)
+
+
+def send_message(chat_id, text, reply_to=None):
+    payload = {
+        "chat_id":    chat_id,
+        "text":       text,
+        "parse_mode": "Markdown",
+        "disable_web_page_preview": True
+    }
+    if reply_to:
+        payload["reply_to_message_id"] = reply_to
+    try:
+        requests.post(f"{BASE_URL}/sendMessage", json=payload, timeout=10)
+    except Exception as e:
+        print(f"[ERROR] sendMessage: {e}")
+
+
+def delete_message(chat_id, message_id):
+    try:
+        requests.post(f"{BASE_URL}/deleteMessage", json={
+            "chat_id":    chat_id,
+            "message_id": message_id
+        }, timeout=10)
+    except Exception as e:
+        print(f"[ERROR] deleteMessage: {e}")
+
+
+def mute_user(chat_id, user_id):
+    """User für 1 Stunde stummschalten"""
+    try:
+        until = int(time.time()) + 3600  # 1 Stunde
+        requests.post(f"{BASE_URL}/restrictChatMember", json={
+            "chat_id":     chat_id,
+            "user_id":     user_id,
+            "until_date":  until,
+            "permissions": {
+                "can_send_messages":        False,
+                "can_send_media_messages":  False,
+                "can_send_polls":           False,
+                "can_send_other_messages":  False,
+                "can_add_web_page_previews":False,
+                "can_change_info":          False,
+                "can_invite_users":         False,
+                "can_pin_messages":         False
+            }
+        }, timeout=10)
+    except Exception as e:
+        print(f"[ERROR] mute: {e}")
+
+
+def is_admin(chat_id, user_id):
+    """Prüft ob User Admin ist"""
+    try:
+        r = requests.get(f"{BASE_URL}/getChatMember", params={
+            "chat_id": chat_id,
+            "user_id": user_id
+        }, timeout=10)
+        status = r.json().get("result", {}).get("status", "")
+        return status in ("administrator", "creator")
+    except:
+        return False
+
+
+def handle_new_members(msg, chat_id):
+    new_members = msg.get("new_chat_members", [])
+    for member in new_members:
+        if member.get("is_bot"):
+            continue
+        name = member.get("first_name", "Trader")
+        send_message(chat_id, WELCOME_MSG.format(name=name))
+
+
+def has_link(text):
+    return bool(re.search(r'(https?://|www\.|t\.me/|@\w+\.(com|de|net|io))', text, re.IGNORECASE))
+
+
+def has_banned_word(text):
+    text_lower = text.lower()
+    return any(word in text_lower for word in BANNED_WORDS)
+
+
+def check_auto_reply(text, chat_id, message_id):
+    text_lower = text.lower()
+    for item in AUTO_REPLIES:
+        if any(kw in text_lower for kw in item["keywords"]):
+            send_message(chat_id, item["reply"], reply_to=message_id)
+            return True
+    return False
+
+
+def handle_update(update):
+    msg = update.get("message", {})
+    if not msg:
+        return
+
+    chat_id    = str(msg.get("chat", {}).get("id", ""))
+    message_id = msg.get("message_id")
+    user       = msg.get("from", {})
+    user_id    = str(user.get("id", ""))
+    username   = user.get("username", user.get("first_name", "User"))
+    text       = msg.get("text", "")
+    caption    = msg.get("caption", "")
+    photo      = msg.get("photo")
+    video      = msg.get("video")
+    document   = msg.get("document")
+    sticker    = msg.get("sticker")
+
+    # Neue Mitglieder begrüßen
+    if msg.get("new_chat_members"):
+        handle_new_members(msg, chat_id)
+        return
+
+    # Admins und Bot selbst ignorieren
+    if user_id == YOUR_USER_ID or user.get("is_bot"):
+        return
+    if is_admin(chat_id, user_id):
+        # Admins dürfen alles – aber Auto-Reply trotzdem
+        if text:
+            check_auto_reply(text, chat_id, message_id)
+        return
+
+    # Bilder/Videos/Dateien löschen
+    if photo or video or document or sticker:
+        delete_message(chat_id, message_id)
+        mute_user(chat_id, user_id)
+        send_message(chat_id,
+            f"🔇 *@{username} wurde stummgeschaltet!*\n"
+            f"⚠️ Grund: Medien nicht erlaubt\n"
+            f"📌 Bitte die Regeln beachten\\!\n"
+            f"🤖 Jarvis | Mentor4Trading"
+        )
+        return
+
+    if text:
+        # Links prüfen
+        if has_link(text):
+            delete_message(chat_id, message_id)
+            mute_user(chat_id, user_id)
+            send_message(chat_id,
+                f"🔇 *@{username} wurde stummgeschaltet!*\n"
+                f"⚠️ Grund: Links & Werbung verboten\n"
+                f"📌 Bitte die Regeln beachten\\!\n"
+                f"🤖 Jarvis | Mentor4Trading"
+            )
+            return
+
+        # Beleidigungen prüfen
+        if has_banned_word(text):
+            delete_message(chat_id, message_id)
+            mute_user(chat_id, user_id)
+            send_message(chat_id,
+                f"🔇 *@{username} wurde stummgeschaltet!*\n"
+                f"⚠️ Grund: Beleidigungen nicht toleriert\n"
+                f"📌 Respektvoller Umgang bitte\\!\n"
+                f"🤖 Jarvis | Mentor4Trading"
+            )
+            return
+
+        # Auto-Reply auf Fragen
+        check_auto_reply(text, chat_id, message_id)
+
+
+def main():
+    print(f"[{datetime.now()}] Gruppen Bot startet...")
+
+    if not BOT_TOKEN or not GROUP_ID:
+        print("[ERROR] BOT_TOKEN oder GROUP_ID fehlt in .env!")
+        return
+
+    offset = 0
+    print("[OK] Bot läuft – überwacht die Gruppe...")
+
+    while True:
+        try:
+            r = requests.get(f"{BASE_URL}/getUpdates", params={
+                "offset":  offset,
+                "timeout": 30
+            }, timeout=35)
+
+            updates = r.json().get("result", [])
+            for update in updates:
+                offset = update["update_id"] + 1
+                handle_update(update)
+
+        except Exception as e:
+            print(f"[ERROR] {e}")
+            time.sleep(5)
+
+
+if __name__ == "__main__":
+    main()
