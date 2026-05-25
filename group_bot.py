@@ -142,7 +142,11 @@ AUTO_REPLIES = [
     },
 ]
 
-WELCOME_MSG = (
+WELCOME_PUBLIC = (
+    "👋 Willkommen {name}\\! Schreib mir einfach wenn du Fragen hast 🤖"
+)
+
+WELCOME_PRIVATE = (
     "👋 *Willkommen in der Mentor4Trading Community, {name}\\!*\n"
     "━━━━━━━━━━━━━━━━━━━━━\n"
     "Schön dass du dabei bist\\! 🎉\n\n"
@@ -230,8 +234,12 @@ def handle_new_members(msg, chat_id):
     for member in new_members:
         if member.get("is_bot"):
             continue
-        name = member.get("first_name", "Trader")
-        send_message(chat_id, WELCOME_MSG.format(name=name))
+        name    = member.get("first_name", "Trader")
+        user_id = member.get("id")
+        # Kurze öffentliche Begrüßung
+        send_message(chat_id, WELCOME_PUBLIC.format(name=name))
+        # Ausführliche private Nachricht
+        send_message(user_id, WELCOME_PRIVATE.format(name=name))
 
 
 def has_link(text):
