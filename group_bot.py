@@ -207,7 +207,10 @@ def ask_claude(question, username):
             timeout=30
         )
         data = r.json()
-        return data["content"][0]["text"]
+        print(f"[API Response] {data}")
+        if "content" in data:
+            return data["content"][0]["text"]
+        return "🤖 Jarvis ist gleich wieder da!"
     except Exception as e:
         print(f"[ERROR] Claude API: {e}")
         return "🤖 Jarvis ist gerade nicht verfügbar – versuch es später nochmal!"
