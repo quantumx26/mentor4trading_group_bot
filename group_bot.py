@@ -209,7 +209,12 @@ def ask_claude(question, username):
         data = r.json()
         print(f"[API Response] {data}")
         if "content" in data:
-            return data["content"][0]["text"]
+            text = data["content"][0]["text"]
+            text = text.replace("**", "*")
+            text = text.replace("# ", "")
+            text = text.replace("## ", "")
+            text = text.replace("### ", "")
+            return text
         return "🤖 Jarvis ist gleich wieder da!"
     except Exception as e:
         print(f"[ERROR] Claude API: {e}")
@@ -341,7 +346,15 @@ def handle_update(update):
             print(f"[CLAUDE] Frage von {username}: {question}")
             answer = ask_claude(question, username)
             print(f"[ANSWER] {answer[:100]}")
-            send_message(chat_id, answer, reply_to=message_id)
+            # Claude Antwort ohne Markdown senden
+            try:
+                requests.post(f"{BASE_URL}/sendMessage", json={
+                    "chat_id": chat_id,
+                    "text": answer,
+                    "reply_to_message_id": message_id
+                }, timeout=10)
+            except Exception as e:
+                print(f"[ERROR] Senden: {e}")
             return
 
     if is_admin(chat_id, user_id):
