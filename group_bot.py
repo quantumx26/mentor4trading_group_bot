@@ -29,7 +29,7 @@ BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 BANNED_WORDS = [
     "idiot", "dummkopf", "arschloch", "wichser", "hurensohn",
     "scheiß", "fuck", "asshole", "bastard", "vollidiot",
-    "depp", "trottel", "versager", "loser", "idiot", "Fick Dich", "Fuck You", "Wichser", "Wixxer"
+    "depp", "trottel", "versager", "loser", "idiot", "Wichser", "Wixxer", "Fuck You", "F*you", "Fick Dich"
 ]
 
 # ── Auto-Antworten auf häufige Fragen ──
@@ -130,13 +130,27 @@ AUTO_REPLIES = [
         )
     },
     {
-        "keywords": ["tiktok", "twitch", "youtube", "stream", "video"],
+        "keywords": ["social", "tiktok", "twitch", "youtube", "stream", "video", "content"],
         "reply": (
             "📱 *Content Plattformen*\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "📱 TikTok: @mentor4trading\n"
             "🎮 Twitch: twitch.tv/mentor4trading\n\n"
-            "Kostenlose Strategien & Live Trading!\n"
+            "Kostenlose Strategien & Live Trading\\!\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "🤖 Jarvis | @mentor4trading\\_signals"
+        )
+    },
+    {
+        "keywords": ["instrument", "instrumente", "was wird", "was trade", "mnq", "mes", "futures", "micro futures"],
+        "reply": (
+            "📈 *Gehandelte Instrumente*\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Wir traden hauptsächlich:\n"
+            "• *MNQ* – Micro E\\-Mini Nasdaq\n"
+            "• *MES* – Micro E\\-Mini S&P 500\n\n"
+            "Kleine Margin, volle Bewegung\\!\n"
+            "Perfekt für Anfänger & Fortgeschrittene\\.\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "🤖 Jarvis | @mentor4trading\\_signals"
         )
@@ -144,17 +158,24 @@ AUTO_REPLIES = [
 ]
 
 WELCOME_MSG = (
-    "👋 *Willkommen in der Mentor4Trading Community, {name}!*\n"
+    "👋 *Willkommen in der Mentor4Trading Community, {name}\\!*\n"
     "━━━━━━━━━━━━━━━━━━━━━\n"
-    "Schön dass du dabei bist! 🎉\n\n"
+    "Schön dass du dabei bist\\! 🎉\n\n"
     "📌 *Regeln:*\n"
     "❌ Keine Links oder Werbung\n"
     "❌ Keine Beleidigungen\n"
     "❌ Keine Bilder/Videos\n"
     "✅ Respektvoller Umgang\n"
     "✅ Trading Fragen jederzeit\n\n"
+    "💬 *Wenn du Fragen hast einfach tippen:*\n\n"
+    "📊 `Indikator` – Info zum SMC Entry Finder\n"
+    "⏰ `Signale` – Wann & wie Signale kommen\n"
+    "📈 `Instrumente` – Was wird getradet\n"
+    "📚 `SMC` oder `ICT` – Strategie Erklärung\n"
+    "🌐 `Website` – Link zur Homepage\n"
+    "📱 `Social` – TikTok & Twitch Links\n"
+    "📖 `ORB` – ORB Strategie Info\n\n"
     "📲 Signal Kanal: @mentor4trading\\_signals\n"
-    "🌐 Website: mentor4trading.netlify.app\n"
     "━━━━━━━━━━━━━━━━━━━━━\n"
     "🤖 Jarvis | Mentor4Trading"
 )
