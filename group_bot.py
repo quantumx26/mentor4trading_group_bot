@@ -18,21 +18,20 @@ load_dotenv()
 
 # ─────────────────────────────────────────────
 BOT_TOKEN    = os.environ.get("BOT_TOKEN", "")
-GROUP_ID     = os.environ.get("GROUP_ID", "")   # Gruppen-ID (nicht Kanal!)
+GROUP_ID     = os.environ.get("GROUP_ID", "")
 YOUR_USER_ID = os.environ.get("YOUR_USER_ID", "")
 TIMEZONE     = "Europe/Berlin"
 # ─────────────────────────────────────────────
 
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
-# ── Beleidigungen / gesperrte Wörter ──
 BANNED_WORDS = [
     "idiot", "dummkopf", "arschloch", "wichser", "hurensohn",
     "scheiß", "fuck", "asshole", "bastard", "vollidiot",
-    "depp", "trottel", "versager", "loser", "idiot", "Wichser", "Wixxer", "Fuck You", "F*you", "Fick Dich"
+    "depp", "trottel", "versager", "loser", "wixxer",
+    "fuck you", "f*you", "fick dich"
 ]
 
-# ── Auto-Antworten auf häufige Fragen ──
 AUTO_REPLIES = [
     {
         "keywords": ["indikator", "indicator", "smc entry", "entry finder", "pine script"],
@@ -49,7 +48,7 @@ AUTO_REPLIES = [
         )
     },
     {
-        "keywords": ["wann signal", "wann kommen", "nächstes signal", "next signal", "wann trade"],
+        "keywords": ["wann signal", "wann kommen", "nächstes signal", "next signal", "wann trade", "signal"],
         "reply": (
             "⏰ *Wann kommen Signale?*\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
@@ -65,14 +64,14 @@ AUTO_REPLIES = [
         )
     },
     {
-        "keywords": ["wie trade", "wie funktioniert", "smc erklär", "was ist smc", "was ist ict", "wie lerne"],
+        "keywords": ["wie trade", "wie funktioniert", "smc erklär", "was ist smc", "was ist ict", "wie lerne", "smc", "ict"],
         "reply": (
             "📚 *SMC/ICT Basics*\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "Alles über SMC & ICT gibt es hier:\n"
             "📱 TikTok: @mentor4trading\n"
             "🎮 Twitch: twitch.tv/mentor4trading\n\n"
-            "Kostenlos reinschauen & lernen!\n"
+            "Kostenlos reinschauen & lernen\\!\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "🤖 Jarvis | @mentor4trading\\_signals"
         )
@@ -84,14 +83,14 @@ AUTO_REPLIES = [
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "Das komplette ORB Ebook gibt es hier:\n"
             "🔗 [mentor4trading.netlify.app](https://mentor4trading.netlify.app)\n\n"
-            "Opening Range Breakout + Retest\n"
-            "Alles erklärt mit echten Chart-Beispielen!\n"
+            "Opening Range Breakout \\+ Retest\n"
+            "Alles erklärt mit echten Chart\\-Beispielen\\!\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "🤖 Jarvis | @mentor4trading\\_signals"
         )
     },
     {
-        "keywords": ["website", "homepage", "seite", "link", "wo finde"],
+        "keywords": ["website", "homepage", "seite", "wo finde"],
         "reply": (
             "🌐 *Mentor4Trading Website*\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
@@ -116,15 +115,15 @@ AUTO_REPLIES = [
         )
     },
     {
-        "keywords": ["mnq", "mes", "futures", "micro futures", "was trade"],
+        "keywords": ["mnq", "mes", "futures", "micro futures", "instrument", "instrumente", "was wird getradet", "was tradet"],
         "reply": (
             "📈 *Gehandelte Instrumente*\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "Wir traden hauptsächlich:\n"
-            "• MNQ – Micro E-Mini Nasdaq\n"
-            "• MES – Micro E-Mini S&P 500\n\n"
-            "Kleine Margin, volle Bewegung!\n"
-            "Perfekt für Anfänger & Fortgeschrittene.\n"
+            "• *MNQ* – Micro E\\-Mini Nasdaq\n"
+            "• *MES* – Micro E\\-Mini S&P 500\n\n"
+            "Kleine Margin, volle Bewegung\\!\n"
+            "Perfekt für Anfänger & Fortgeschrittene\\.\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "🤖 Jarvis | @mentor4trading\\_signals"
         )
@@ -136,21 +135,7 @@ AUTO_REPLIES = [
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "📱 TikTok: @mentor4trading\n"
             "🎮 Twitch: twitch.tv/mentor4trading\n\n"
-            "Kostenlose Strategien & Live Trading\\!\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
-            "🤖 Jarvis | @mentor4trading\\_signals"
-        )
-    },
-    {
-        "keywords": ["instrument", "instrumente", "was wird", "was trade", "mnq", "mes", "futures", "micro futures"],
-        "reply": (
-            "📈 *Gehandelte Instrumente*\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
-            "Wir traden hauptsächlich:\n"
-            "• *MNQ* – Micro E\\-Mini Nasdaq\n"
-            "• *MES* – Micro E\\-Mini S&P 500\n\n"
-            "Kleine Margin, volle Bewegung\\!\n"
-            "Perfekt für Anfänger & Fortgeschrittene\\.\n"
+            "Kostenlos reinschauen & lernen\\!\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "🤖 Jarvis | @mentor4trading\\_signals"
         )
@@ -207,22 +192,21 @@ def delete_message(chat_id, message_id):
 
 
 def mute_user(chat_id, user_id):
-    """User für 1 Stunde stummschalten"""
     try:
-        until = int(time.time()) + 3600  # 1 Stunde
+        until = int(time.time()) + 3600
         requests.post(f"{BASE_URL}/restrictChatMember", json={
             "chat_id":     chat_id,
             "user_id":     user_id,
             "until_date":  until,
             "permissions": {
-                "can_send_messages":        False,
-                "can_send_media_messages":  False,
-                "can_send_polls":           False,
-                "can_send_other_messages":  False,
-                "can_add_web_page_previews":False,
-                "can_change_info":          False,
-                "can_invite_users":         False,
-                "can_pin_messages":         False
+                "can_send_messages":         False,
+                "can_send_media_messages":   False,
+                "can_send_polls":            False,
+                "can_send_other_messages":   False,
+                "can_add_web_page_previews": False,
+                "can_change_info":           False,
+                "can_invite_users":          False,
+                "can_pin_messages":          False
             }
         }, timeout=10)
     except Exception as e:
@@ -230,7 +214,6 @@ def mute_user(chat_id, user_id):
 
 
 def is_admin(chat_id, user_id):
-    """Prüft ob User Admin ist"""
     try:
         r = requests.get(f"{BASE_URL}/getChatMember", params={
             "chat_id": chat_id,
@@ -274,28 +257,34 @@ def handle_update(update):
     if not msg:
         return
 
+    # Weitergeleitete Kanal-Nachrichten ignorieren
+    if msg.get("forward_from_chat"):
+        return
+    if msg.get("sender_chat"):
+        return
+
+    # Neue Mitglieder begrüßen
+    if msg.get("new_chat_members"):
+        handle_new_members(msg, msg.get("chat", {}).get("id"))
+        return
+
     chat_id    = str(msg.get("chat", {}).get("id", ""))
     message_id = msg.get("message_id")
     user       = msg.get("from", {})
     user_id    = str(user.get("id", ""))
     username   = user.get("username", user.get("first_name", "User"))
     text       = msg.get("text", "")
-    caption    = msg.get("caption", "")
     photo      = msg.get("photo")
     video      = msg.get("video")
     document   = msg.get("document")
     sticker    = msg.get("sticker")
 
-    # Neue Mitglieder begrüßen
-    if msg.get("new_chat_members"):
-        handle_new_members(msg, chat_id)
+    # Bots ignorieren
+    if user.get("is_bot"):
         return
 
-    # Admins und Bot selbst ignorieren
-    if user_id == YOUR_USER_ID or user.get("is_bot"):
-        return
+    # Admins: nur Auto-Reply
     if is_admin(chat_id, user_id):
-        # Admins dürfen alles – aber Auto-Reply trotzdem
         if text:
             check_auto_reply(text, chat_id, message_id)
         return
@@ -305,7 +294,7 @@ def handle_update(update):
         delete_message(chat_id, message_id)
         mute_user(chat_id, user_id)
         send_message(chat_id,
-            f"🔇 *@{username} wurde stummgeschaltet!*\n"
+            f"🔇 *@{username} wurde stummgeschaltet\\!*\n"
             f"⚠️ Grund: Medien nicht erlaubt\n"
             f"📌 Bitte die Regeln beachten\\!\n"
             f"🤖 Jarvis | Mentor4Trading"
@@ -313,31 +302,28 @@ def handle_update(update):
         return
 
     if text:
-        # Links prüfen
         if has_link(text):
             delete_message(chat_id, message_id)
             mute_user(chat_id, user_id)
             send_message(chat_id,
-                f"🔇 *@{username} wurde stummgeschaltet!*\n"
+                f"🔇 *@{username} wurde stummgeschaltet\\!*\n"
                 f"⚠️ Grund: Links & Werbung verboten\n"
                 f"📌 Bitte die Regeln beachten\\!\n"
                 f"🤖 Jarvis | Mentor4Trading"
             )
             return
 
-        # Beleidigungen prüfen
         if has_banned_word(text):
             delete_message(chat_id, message_id)
             mute_user(chat_id, user_id)
             send_message(chat_id,
-                f"🔇 *@{username} wurde stummgeschaltet!*\n"
+                f"🔇 *@{username} wurde stummgeschaltet\\!*\n"
                 f"⚠️ Grund: Beleidigungen nicht toleriert\n"
                 f"📌 Respektvoller Umgang bitte\\!\n"
                 f"🤖 Jarvis | Mentor4Trading"
             )
             return
 
-        # Auto-Reply auf Fragen
         check_auto_reply(text, chat_id, message_id)
 
 
@@ -355,8 +341,8 @@ def main():
         try:
             r = requests.get(f"{BASE_URL}/getUpdates", params={
                 "offset":  offset,
-                "timeout": 30
-            }, timeout=35)
+                "timeout": 5
+            }, timeout=10)
 
             updates = r.json().get("result", [])
             for update in updates:
