@@ -414,7 +414,7 @@ def main():
 
             updates = r.json().get("result", [])
             if updates:
-            print(f"[DEBUG] {len(updates)} Updates empfangen")
+                print(f"[DEBUG] {len(updates)} Updates empfangen")
             for update in updates:
                 offset = update["update_id"] + 1
                 handle_update(update)
