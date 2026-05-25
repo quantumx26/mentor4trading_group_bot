@@ -17,10 +17,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ─────────────────────────────────────────────
-BOT_TOKEN    = os.environ.get("BOT_TOKEN", "")
-GROUP_ID     = os.environ.get("GROUP_ID", "")
-YOUR_USER_ID = os.environ.get("YOUR_USER_ID", "")
-TIMEZONE     = "Europe/Berlin"
+BOT_TOKEN        = os.environ.get("BOT_TOKEN", "")
+GROUP_ID         = os.environ.get("GROUP_ID", "")
+YOUR_USER_ID     = os.environ.get("YOUR_USER_ID", "")
+ANTHROPIC_KEY    = os.environ.get("ANTHROPIC_API_KEY", "")
+TIMEZONE         = "Europe/Berlin"
+BOT_USERNAME     = "JarvisCommunityBot"
 # ─────────────────────────────────────────────
 
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
@@ -170,6 +172,48 @@ WELCOME_PRIVATE = (
 )
 
 
+def ask_claude(question, username):
+    """Schickt Frage an Claude API und gibt Antwort zurück"""
+    try:
+        system_prompt = """Du bist Jarvis, der KI-Assistent von Mentor4Trading.
+Du hilfst Tradern bei Fragen rund um SMC/ICT Trading, Futures und die Mentor4Trading Community.
+
+Wichtige Infos über Mentor4Trading:
+- Gehandelt werden MNQ und MES (Micro E-Mini Futures)
+- Strategie: SMC/ICT – CHoCH, BOS, FVG, Liquidity
+- Trading Zeiten: London 08:00-12:00, New York 14:30-21:00
+- Indikator: SMC Entry Finder V5 – kostenlos auf mentor4trading.netlify.app
+- TikTok: @mentor4trading | Twitch: twitch.tv/mentor4trading
+- Signal Kanal: @mentor4trading_signals
+
+Antworte immer auf Deutsch, freundlich und kompetent.
+Halte Antworten kurz und präzise – maximal 3-4 Sätze.
+Beende jede Antwort mit: 🤖 Jarvis | @mentor4trading_signals"""
+
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": ANTHROPIC_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            },
+            json={
+                "model": "claude-haiku-4-5-20251001",
+                "max_tokens": 300,
+                "system": system_prompt,
+                "messages": [
+                    {"role": "user", "content": f"{username} fragt: {question}"}
+                ]
+            },
+            timeout=30
+        )
+        data = r.json()
+        return data["content"][0]["text"]
+    except Exception as e:
+        print(f"[ERROR] Claude API: {e}")
+        return "🤖 Jarvis ist gerade nicht verfügbar – versuch es später nochmal!"
+
+
 def send_message(chat_id, text, reply_to=None):
     payload = {
         "chat_id":    chat_id,
@@ -310,6 +354,15 @@ def handle_update(update):
         return
 
     if text:
+        # Bot Erwähnung → Claude antworten lassen
+        if f"@{BOT_USERNAME}".lower() in text.lower():
+            question = text.lower().replace(f"@{BOT_USERNAME}".lower(), "").strip()
+            if question:
+                username = user.get("first_name", "Trader")
+                answer   = ask_claude(question, username)
+                send_message(chat_id, answer, reply_to=message_id)
+                return
+
         if has_link(text):
             delete_message(chat_id, message_id)
             mute_user(chat_id, user_id)
