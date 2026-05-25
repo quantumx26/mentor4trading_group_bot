@@ -337,6 +337,7 @@ def handle_update(update):
         if question:
             print(f"[CLAUDE] Frage von {username}: {question}")
             answer = ask_claude(question, username)
+            print(f"[ANSWER] {answer[:100]}")
             send_message(chat_id, answer, reply_to=message_id)
             return
 
