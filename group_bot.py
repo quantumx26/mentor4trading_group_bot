@@ -4,6 +4,7 @@ Mentor4Trading – Community Gruppen Bot
 - Neue Mitglieder begrüßen
 - Chat überwachen (Links, Werbung, Bilder, Beleidigungen)
 - Auf häufige Fragen automatisch antworten
+- Claude KI Integration via @JarvisCommunityBot
 """
 
 import requests
@@ -17,12 +18,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ─────────────────────────────────────────────
-BOT_TOKEN        = os.environ.get("BOT_TOKEN", "")
-GROUP_ID         = os.environ.get("GROUP_ID", "")
-YOUR_USER_ID     = os.environ.get("YOUR_USER_ID", "")
-ANTHROPIC_KEY    = os.environ.get("ANTHROPIC_API_KEY", "")
-TIMEZONE         = "Europe/Berlin"
-BOT_USERNAME     = "JarvisCommunityBot"
+BOT_TOKEN     = os.environ.get("BOT_TOKEN", "")
+GROUP_ID      = os.environ.get("GROUP_ID", "")
+YOUR_USER_ID  = os.environ.get("YOUR_USER_ID", "")
+ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+TIMEZONE      = "Europe/Berlin"
+BOT_USERNAME  = "JarvisCommunityBot"
 # ─────────────────────────────────────────────
 
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
@@ -31,7 +32,7 @@ BANNED_WORDS = [
     "idiot", "dummkopf", "arschloch", "wichser", "hurensohn",
     "scheiß", "fuck", "asshole", "bastard", "vollidiot",
     "depp", "trottel", "versager", "loser", "wixxer",
-    "fuck you", "f*you", "fick dich"
+    "fuck you", "fick dich"
 ]
 
 AUTO_REPLIES = [
@@ -144,13 +145,7 @@ AUTO_REPLIES = [
     },
 ]
 
-WELCOME_PUBLIC = (
-    "👋 Willkommen {name}\\! Schreib mir einfach wenn du Fragen hast 🤖"
-    "🤖 *Jarvis KI:*\n"
-    "Schreib einfach @JarvisCommunityBot \\+ deine Frage\\!\n"
-    "Ich beantworte alles rund um SMC & Trading\\!\n\n"
-    "📲 Signal Kanal: @mentor4trading\\_signals\n"
-)
+WELCOME_PUBLIC = "👋 Willkommen {name}\\! Schreib mir einfach wenn du Fragen hast 🤖"
 
 WELCOME_PRIVATE = (
     "👋 *Willkommen in der Mentor4Trading Community, {name}\\!*\n"
@@ -171,8 +166,8 @@ WELCOME_PRIVATE = (
     "📱 `Social` – TikTok & Twitch Links\n"
     "📖 `ORB` – ORB Strategie Info\n\n"
     "🤖 *Jarvis KI:*\n"
-    "Schreib einfach @JarvisCommunityBot \\+ deine Frage\\!\n"
-    "Ich beantworte alles rund um SMC & Trading\\!\n\n"
+    "Schreib @JarvisCommunityBot \\+ deine Frage\\!\n"
+    "Ich beantworte alles rund um SMC, ICT & Trading\\!\n\n"
     "📲 Signal Kanal: @mentor4trading\\_signals\n"
     "━━━━━━━━━━━━━━━━━━━━━\n"
     "🤖 Jarvis | Mentor4Trading"
@@ -180,23 +175,20 @@ WELCOME_PRIVATE = (
 
 
 def ask_claude(question, username):
-    """Schickt Frage an Claude API und gibt Antwort zurück"""
     try:
-        system_prompt = """Du bist Jarvis, der KI-Assistent von Mentor4Trading.
-Du hilfst Tradern bei Fragen rund um SMC/ICT Trading, Futures und die Mentor4Trading Community.
-
-Wichtige Infos über Mentor4Trading:
-- Gehandelt werden MNQ und MES (Micro E-Mini Futures)
-- Strategie: SMC/ICT – CHoCH, BOS, FVG, Liquidity
-- Trading Zeiten: London 08:00-12:00, New York 14:30-21:00
-- Indikator: SMC Entry Finder V5 – kostenlos auf mentor4trading.netlify.app
-- TikTok: @mentor4trading | Twitch: twitch.tv/mentor4trading
-- Signal Kanal: @mentor4trading_signals
-
-Antworte immer auf Deutsch, freundlich und kompetent.
-Halte Antworten kurz und präzise – maximal 3-4 Sätze.
-Beende jede Antwort mit: 🤖 Jarvis | @mentor4trading_signals"""
-
+        system_prompt = (
+            "Du bist Jarvis, der KI-Assistent von Mentor4Trading. "
+            "Du hilfst Tradern bei Fragen rund um SMC/ICT Trading, Futures und die Mentor4Trading Community. "
+            "Wichtige Infos: Gehandelt werden MNQ und MES Micro E-Mini Futures. "
+            "Strategie: SMC/ICT – CHoCH, BOS, FVG, Liquidity. "
+            "Trading Zeiten: London 08:00-12:00, New York 14:30-21:00. "
+            "Indikator: SMC Entry Finder V5 kostenlos auf mentor4trading.netlify.app. "
+            "TikTok: @mentor4trading | Twitch: twitch.tv/mentor4trading. "
+            "Signal Kanal: @mentor4trading_signals. "
+            "Antworte immer auf Deutsch, freundlich und kompetent. "
+            "Halte Antworten kurz – maximal 3-4 Sätze. "
+            "Beende jede Antwort mit: 🤖 Jarvis | @mentor4trading_signals"
+        )
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
             headers={
@@ -223,8 +215,8 @@ Beende jede Antwort mit: 🤖 Jarvis | @mentor4trading_signals"""
 
 def send_message(chat_id, text, reply_to=None):
     payload = {
-        "chat_id":    chat_id,
-        "text":       text,
+        "chat_id": chat_id,
+        "text": text,
         "parse_mode": "Markdown",
         "disable_web_page_preview": True
     }
@@ -239,7 +231,7 @@ def send_message(chat_id, text, reply_to=None):
 def delete_message(chat_id, message_id):
     try:
         requests.post(f"{BASE_URL}/deleteMessage", json={
-            "chat_id":    chat_id,
+            "chat_id": chat_id,
             "message_id": message_id
         }, timeout=10)
     except Exception as e:
@@ -250,18 +242,18 @@ def mute_user(chat_id, user_id):
     try:
         until = int(time.time()) + 3600
         requests.post(f"{BASE_URL}/restrictChatMember", json={
-            "chat_id":     chat_id,
-            "user_id":     user_id,
-            "until_date":  until,
+            "chat_id": chat_id,
+            "user_id": user_id,
+            "until_date": until,
             "permissions": {
-                "can_send_messages":         False,
-                "can_send_media_messages":   False,
-                "can_send_polls":            False,
-                "can_send_other_messages":   False,
+                "can_send_messages": False,
+                "can_send_media_messages": False,
+                "can_send_polls": False,
+                "can_send_other_messages": False,
                 "can_add_web_page_previews": False,
-                "can_change_info":           False,
-                "can_invite_users":          False,
-                "can_pin_messages":          False
+                "can_change_info": False,
+                "can_invite_users": False,
+                "can_pin_messages": False
             }
         }, timeout=10)
     except Exception as e:
@@ -285,11 +277,9 @@ def handle_new_members(msg, chat_id):
     for member in new_members:
         if member.get("is_bot"):
             continue
-        name    = member.get("first_name", "Trader")
+        name = member.get("first_name", "Trader")
         user_id = member.get("id")
-        # Kurze öffentliche Begrüßung
         send_message(chat_id, WELCOME_PUBLIC.format(name=name))
-        # Ausführliche private Nachricht
         send_message(user_id, WELCOME_PRIVATE.format(name=name))
 
 
@@ -316,39 +306,45 @@ def handle_update(update):
     if not msg:
         return
 
-    # Weitergeleitete Kanal-Nachrichten ignorieren
     if msg.get("forward_from_chat"):
         return
     if msg.get("sender_chat"):
         return
 
-    # Neue Mitglieder begrüßen
     if msg.get("new_chat_members"):
         handle_new_members(msg, msg.get("chat", {}).get("id"))
         return
 
-    chat_id    = str(msg.get("chat", {}).get("id", ""))
+    chat_id = str(msg.get("chat", {}).get("id", ""))
     message_id = msg.get("message_id")
-    user       = msg.get("from", {})
-    user_id    = str(user.get("id", ""))
-    username   = user.get("username", user.get("first_name", "User"))
-    text       = msg.get("text", "")
-    photo      = msg.get("photo")
-    video      = msg.get("video")
-    document   = msg.get("document")
-    sticker    = msg.get("sticker")
+    user = msg.get("from", {})
+    user_id = str(user.get("id", ""))
+    username = user.get("first_name", "Trader")
+    text = msg.get("text", "")
+    photo = msg.get("photo")
+    video = msg.get("video")
+    document = msg.get("document")
+    sticker = msg.get("sticker")
 
-    # Bots ignorieren
     if user.get("is_bot"):
         return
 
-    # Admins: nur Auto-Reply
+    print(f"[MSG] {username}: {text[:50]}")
+
+    # Bot Erwähnung → Claude
+    if text and f"@{BOT_USERNAME}".lower() in text.lower():
+        question = re.sub(f"@{BOT_USERNAME}", "", text, flags=re.IGNORECASE).strip()
+        if question:
+            print(f"[CLAUDE] Frage von {username}: {question}")
+            answer = ask_claude(question, username)
+            send_message(chat_id, answer, reply_to=message_id)
+            return
+
     if is_admin(chat_id, user_id):
         if text:
             check_auto_reply(text, chat_id, message_id)
         return
 
-    # Bilder/Videos/Dateien löschen
     if photo or video or document or sticker:
         delete_message(chat_id, message_id)
         mute_user(chat_id, user_id)
@@ -361,15 +357,6 @@ def handle_update(update):
         return
 
     if text:
-        # Bot Erwähnung → Claude antworten lassen
-        if f"@{BOT_USERNAME}".lower() in text.lower():
-            question = text.lower().replace(f"@{BOT_USERNAME}".lower(), "").strip()
-            if question:
-                username = user.get("first_name", "Trader")
-                answer   = ask_claude(question, username)
-                send_message(chat_id, answer, reply_to=message_id)
-                return
-
         if has_link(text):
             delete_message(chat_id, message_id)
             mute_user(chat_id, user_id)
@@ -408,7 +395,7 @@ def main():
     while True:
         try:
             r = requests.get(f"{BASE_URL}/getUpdates", params={
-                "offset":  offset,
+                "offset": offset,
                 "timeout": 5
             }, timeout=10)
 
